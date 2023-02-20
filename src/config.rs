@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{Error, ErrorKind, Read};
+use std::path::Path;
 
 use toml::Value;
 
@@ -26,10 +27,7 @@ impl Config {
         };
 
         let debug = match config.get("config").and_then(|cfg| cfg.get("debug")) {
-            Some(v) => match v.as_bool() {
-                Some(w) => w,
-                None => false,
-            },
+            Some(v) => v.as_bool().unwrap_or(false),
             None => false,
         };
 
@@ -43,10 +41,13 @@ impl Config {
 
         let locations = locations
             .iter()
-            .map(|v| -> String {
-                match v.as_str() {
-                    Some(w) => w.to_owned(),
-                    None => "".to_owned(),
+            .filter_map(|v| v.as_str())
+            .map(|v| v.to_owned())
+            .filter_map(|p| -> Option<String> {
+                if Path::new(&p).is_dir() {
+                    Some(p)
+                } else {
+                    None
                 }
             })
             .collect();
