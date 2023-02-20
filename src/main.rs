@@ -9,6 +9,8 @@ const IMG_EXTENSIONS: [&str; 3] = [".jpg", ".jpeg", ".png"];
 fn main() -> Result<(), Error> {
     let cfg = config::Config::read()?;
 
+    let mut count: u32 = 0;
+
     for dir in cfg.locations {
         for entry in WalkDir::new(dir).into_iter().filter_map(|e| e.ok()) {
             let f_name = entry.path().to_string_lossy();
@@ -16,10 +18,13 @@ fn main() -> Result<(), Error> {
             for extension in IMG_EXTENSIONS {
                 if f_name.ends_with(extension) {
                     println!("{}", f_name);
+                    count += 1;
                 }
             }
         }
     }
+
+    println!("found {} files", count);
 
     Ok(())
 }
