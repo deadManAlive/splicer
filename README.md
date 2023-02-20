@@ -2,7 +2,7 @@
 
 Windows 10's Photos App Live Tile Changer ported to Rust.
 
-Example of `config.toml`:
+Example of `config.toml` (place into working directory):
 ```toml
 [config]
 debug = true
