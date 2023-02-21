@@ -33,5 +33,15 @@ fn main() -> Result<(), Error> {
 
     println!("found {} files in {} ms.", flist.len(), start.elapsed().as_millis());
 
+    let sample = if flist.len() < 5 { flist } else {
+        let mut rng = rand::thread_rng();
+        rand::seq::index::sample(&mut rng, flist.len(), 5)
+            .iter()
+            .map(|i| flist[i].clone())
+            .collect()
+    };
+
+    println!("{:#?}", sample);
+
     Ok(())
 }
