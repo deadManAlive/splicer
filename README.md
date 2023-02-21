@@ -11,4 +11,5 @@ locations = [
     "D:/images",
     "E:/Family"
 ]
+ouput = "output"
 ```

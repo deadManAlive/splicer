@@ -1,21 +1,22 @@
 use std::fs::File;
 use std::io::{Error, ErrorKind, Read};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use toml::Value;
 
 #[derive(Debug)]
-pub struct Config {
+pub struct Config<P: AsRef<Path>> {
     pub debug: bool,
     pub locations: Vec<String>,
+    pub output: P,
 }
 
 fn mk_io_err(error: &str) -> Error {
     Error::new(ErrorKind::Other, error)
 }
 
-impl Config {
-    pub fn read() -> Result<Config, Error> {
+impl<P: AsRef<Path>> Config<P> {
+    pub fn read() -> Result<Config<PathBuf>, Error> {
         let mut config_file = File::open("./config.toml")?;
         let mut config_contents = String::new();
 
@@ -39,6 +40,12 @@ impl Config {
             None => return Err(mk_io_err("cannot find 'locations' key in config file")),
         };
 
+        let output = match  config.get("config").and_then(|cfg| cfg.get("output")) {
+            Some(v) => v.as_str().unwrap_or("output").to_owned(),
+            None => "output".to_owned(),
+        };
+        let output = PathBuf::from(output);
+
         let locations = locations
             .iter()
             .filter_map(|v| v.as_str())
@@ -52,6 +59,6 @@ impl Config {
             })
             .collect();
 
-        Ok(Config { debug, locations })
+        Ok(Config { debug, locations, output })
     }
 }

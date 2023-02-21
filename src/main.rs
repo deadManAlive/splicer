@@ -1,4 +1,4 @@
-use std::{io::Error, time::Instant};
+use std::{io::Error, time::Instant, path::PathBuf, ffi::OsStr, fs::{read_dir, remove_file, metadata, create_dir}};
 use walkdir::{DirEntry, WalkDir};
 
 mod config;
@@ -7,7 +7,7 @@ mod img;
 const IMG_EXTENSIONS: [&str; 3] = [".jpg", ".jpeg", ".png"];
 
 fn main() -> Result<(), Error> {
-    let cfg = config::Config::read()?;
+    let cfg = config::Config::<PathBuf>::read()?;
 
     let mut flist: Vec<DirEntry> = vec![];
 
@@ -32,7 +32,7 @@ fn main() -> Result<(), Error> {
         flist.append(&mut files);
     }
 
-    println!("found {} files in {} ms.", flist.len(), start.elapsed().as_millis());
+    println!("Found {} files in {} ms.", flist.len(), start.elapsed().as_millis());
     
     let start = Instant::now();
 
@@ -44,10 +44,25 @@ fn main() -> Result<(), Error> {
             .collect()
     };
 
+    if !metadata(&cfg.output)?.is_dir() {
+        create_dir(&cfg.output)?;
+    }
+
+    for files in (read_dir(&cfg.output)?).flatten() {
+        if let Err(v) = remove_file(files.path()) {
+            println!("{}", v);
+        }
+    }
+
 
     for (i, fimg) in sample.iter().enumerate() {
         let cimg = img::crop(fimg.path());
-        if let Err (v) = cimg.unwrap().save(format!("./output/{}.png", i)) {
+        let mut output_dir = cfg.output.clone();
+        output_dir.push(i.to_string());
+        output_dir.set_extension(fimg.path().extension().unwrap_or(OsStr::new("jpg")));
+        if let Err (v) = cimg
+                            .unwrap()
+                            .save(output_dir) {
             println!("{}", v);
         }
     }
