@@ -18,7 +18,7 @@ fn main() -> Result<(), Error> {
             .into_iter()
             .filter_map(|e| e.ok())
             .filter_map(|f| -> Option<DirEntry> {
-                let f_name = f.file_name().to_string_lossy();
+                let f_name = f.file_name().to_string_lossy().to_ascii_lowercase();
 
                 for extension in IMG_EXTENSIONS {
                     if f_name.ends_with(extension) {
@@ -62,7 +62,7 @@ fn main() -> Result<(), Error> {
         output_dir.set_extension(fimg.path().extension().unwrap_or(OsStr::new("jpg")));
         if let Err (v) = cimg
                             .unwrap()
-                            .save(output_dir) {
+                            .save(output_dir.to_string_lossy().to_ascii_lowercase()) {
             println!("{}", v);
         }
     }
