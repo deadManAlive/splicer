@@ -2,6 +2,7 @@ use std::{io::Error, time::Instant};
 use walkdir::{DirEntry, WalkDir};
 
 mod config;
+mod img;
 
 const IMG_EXTENSIONS: [&str; 3] = [".jpg", ".jpeg", ".png"];
 
@@ -32,6 +33,8 @@ fn main() -> Result<(), Error> {
     }
 
     println!("found {} files in {} ms.", flist.len(), start.elapsed().as_millis());
+    
+    let start = Instant::now();
 
     let sample = if flist.len() < 5 { flist } else {
         let mut rng = rand::thread_rng();
@@ -41,7 +44,15 @@ fn main() -> Result<(), Error> {
             .collect()
     };
 
-    println!("{:#?}", sample);
+
+    for (i, fimg) in sample.iter().enumerate() {
+        let cimg = img::crop(fimg.path());
+        if let Err (v) = cimg.unwrap().save(format!("./output/{}.png", i)) {
+            println!("{}", v);
+        }
+    }
+
+    println!("sampling and processing {} images in {} ms", sample.len(), start.elapsed().as_millis());
 
     Ok(())
 }
