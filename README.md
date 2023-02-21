@@ -1,6 +1,6 @@
 # Splicer
 
-Windows 10's Photos App Live Tile Changer ported to Rust.
+[Windows 10's Photos App Live Tile Changer](https://github.com/deadManAlive/tileupdater) ported to Rust.
 
 Example of `config.toml` (place into working directory):
 ```toml
