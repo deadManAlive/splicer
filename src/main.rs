@@ -21,7 +21,7 @@ fn main() -> Result<(), Error> {
     let start = Instant::now();
 
     for dir in &cfg.locations {
-        let mut files: Vec<DirEntry> = WalkDir::new(&dir)
+        let mut files: Vec<DirEntry> = WalkDir::new(dir)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter_map(|f| -> Option<DirEntry> {
@@ -62,11 +62,11 @@ fn main() -> Result<(), Error> {
     for (i, fimg) in sample.iter().enumerate() {
         let cimg = img::crop(fimg.path());
         let mut output_dir = cfg.output.clone();
-        output_dir.push(i.to_string());
-        output_dir.set_extension(fimg.path().extension().unwrap_or(OsStr::new("jpg")));
+        output_dir.push(format!("Tile{}", i));
+        output_dir.set_extension(fimg.path().extension().unwrap_or(OsStr::new("jpg")).to_ascii_lowercase());
         if let Err(v) = cimg
             .unwrap()
-            .save(output_dir.to_string_lossy().to_ascii_lowercase())
+            .save(output_dir.to_string_lossy().to_string())
         {
             println!("{}", v);
         }
