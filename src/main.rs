@@ -1,11 +1,12 @@
 use std::{
     ffi::OsStr,
-    fs::{create_dir, metadata, read_dir, remove_file},
-    io::Error,
+    fs::{create_dir, metadata, read_dir, remove_file, OpenOptions},
+    io::{Write, Error},
     path::PathBuf,
     time::Instant,
 };
 use walkdir::{DirEntry, WalkDir};
+use chrono::Local;
 
 mod config;
 mod img;
@@ -19,7 +20,7 @@ fn main() -> Result<(), Error> {
 
     let start = Instant::now();
 
-    for dir in cfg.locations {
+    for dir in &cfg.locations {
         let mut files: Vec<DirEntry> = WalkDir::new(&dir)
             .into_iter()
             .filter_map(|e| e.ok())
@@ -38,16 +39,8 @@ fn main() -> Result<(), Error> {
         flist.append(&mut files);
     }
 
-    println!(
-        "Found {} files in {} ms.",
-        flist.len(),
-        start.elapsed().as_millis()
-    );
-
-    let start = Instant::now();
-
     let sample = if flist.len() < 5 {
-        flist
+        flist.clone()
     } else {
         let mut rng = rand::thread_rng();
         rand::seq::index::sample(&mut rng, flist.len(), 5)
@@ -79,12 +72,18 @@ fn main() -> Result<(), Error> {
         }
     }
 
-    println!(
-        "sampling and processing {} images in {} ms to '{}'",
-        sample.len(),
-        start.elapsed().as_millis(),
-        cfg.output.display()
-    );
+    if cfg.log {
+        if let Ok(v) = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open("log.txt") {
+                let now = Local::now().format("%Y-%m-%d %H:%M:%S (%a)").to_string();
+    
+                let mut logfile = v;
+    
+                writeln!(logfile, "{}: Done sampling {} from {} found in {} ms.", now, sample.len(), flist.len(), start.elapsed().as_millis())?;
+            }
+    }
 
     Ok(())
 }

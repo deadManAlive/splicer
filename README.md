@@ -5,6 +5,10 @@ Picture random pick-crop--save. Based on [Windows 10's Photos App Live Tile Chan
 Example of `config.toml` (place into working directory):
 ```toml
 [config]
+# Sets wether to enable log
+# Defaults to true
+log = true
+
 # Sets where output folder is.
 # Delete/comment this key to load to the app folder.
 # Invalid value defaults to folder "output" of working directory.
