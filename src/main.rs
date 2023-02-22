@@ -1,4 +1,10 @@
-use std::{io::Error, time::Instant, path::PathBuf, ffi::OsStr, fs::{read_dir, remove_file, metadata, create_dir}};
+use std::{
+    ffi::OsStr,
+    fs::{create_dir, metadata, read_dir, remove_file},
+    io::Error,
+    path::PathBuf,
+    time::Instant,
+};
 use walkdir::{DirEntry, WalkDir};
 
 mod config;
@@ -32,11 +38,17 @@ fn main() -> Result<(), Error> {
         flist.append(&mut files);
     }
 
-    println!("Found {} files in {} ms.", flist.len(), start.elapsed().as_millis());
-    
+    println!(
+        "Found {} files in {} ms.",
+        flist.len(),
+        start.elapsed().as_millis()
+    );
+
     let start = Instant::now();
 
-    let sample = if flist.len() < 5 { flist } else {
+    let sample = if flist.len() < 5 {
+        flist
+    } else {
         let mut rng = rand::thread_rng();
         rand::seq::index::sample(&mut rng, flist.len(), 5)
             .iter()
@@ -54,20 +66,25 @@ fn main() -> Result<(), Error> {
         }
     }
 
-
     for (i, fimg) in sample.iter().enumerate() {
         let cimg = img::crop(fimg.path());
         let mut output_dir = cfg.output.clone();
         output_dir.push(i.to_string());
         output_dir.set_extension(fimg.path().extension().unwrap_or(OsStr::new("jpg")));
-        if let Err (v) = cimg
-                            .unwrap()
-                            .save(output_dir.to_string_lossy().to_ascii_lowercase()) {
+        if let Err(v) = cimg
+            .unwrap()
+            .save(output_dir.to_string_lossy().to_ascii_lowercase())
+        {
             println!("{}", v);
         }
     }
 
-    println!("sampling and processing {} images in {} ms", sample.len(), start.elapsed().as_millis());
+    println!(
+        "sampling and processing {} images in {} ms to '{}'",
+        sample.len(),
+        start.elapsed().as_millis(),
+        cfg.output.display()
+    );
 
     Ok(())
 }

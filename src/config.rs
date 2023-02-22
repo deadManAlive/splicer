@@ -4,6 +4,8 @@ use std::path::{Path, PathBuf};
 
 use toml::Value;
 
+pub mod dir;
+
 #[derive(Debug)]
 pub struct Config<P: AsRef<Path>> {
     pub debug: bool,
@@ -40,11 +42,14 @@ impl<P: AsRef<Path>> Config<P> {
             None => return Err(mk_io_err("cannot find 'locations' key in config file")),
         };
 
-        let output = match  config.get("config").and_then(|cfg| cfg.get("output")) {
-            Some(v) => v.as_str().unwrap_or("output").to_owned(),
-            None => "output".to_owned(),
+        let output = match config.get("config").and_then(|cfg| cfg.get("output")) {
+            Some(v) => {
+                let d = v.as_str().unwrap_or("output");
+                PathBuf::from(d)
+            }
+            None => dir::get_dir().unwrap_or(PathBuf::from("output")),
         };
-        let output = PathBuf::from(output);
+        // let output = PathBuf::from(output);
 
         let locations = locations
             .iter()
@@ -59,6 +64,10 @@ impl<P: AsRef<Path>> Config<P> {
             })
             .collect();
 
-        Ok(Config { debug, locations, output })
+        Ok(Config {
+            debug,
+            locations,
+            output,
+        })
     }
 }
