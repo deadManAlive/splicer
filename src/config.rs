@@ -8,7 +8,6 @@ pub mod dir;
 
 #[derive(Debug)]
 pub struct Config<P: AsRef<Path>> {
-    pub debug: bool,
     pub locations: Vec<String>,
     pub output: P,
 }
@@ -27,11 +26,6 @@ impl<P: AsRef<Path>> Config<P> {
         let config: Value = match config_contents.parse::<Value>() {
             Ok(v) => v,
             Err(_) => return Err(mk_io_err("error reading config.toml")),
-        };
-
-        let debug = match config.get("config").and_then(|cfg| cfg.get("debug")) {
-            Some(v) => v.as_bool().unwrap_or(false),
-            None => false,
         };
 
         let locations = match config.get("config").and_then(|cfg| cfg.get("locations")) {
@@ -64,10 +58,6 @@ impl<P: AsRef<Path>> Config<P> {
             })
             .collect();
 
-        Ok(Config {
-            debug,
-            locations,
-            output,
-        })
+        Ok(Config { locations, output })
     }
 }
