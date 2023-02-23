@@ -1,12 +1,13 @@
+#![windows_subsystem = "windows"]
+
+use chrono::Local;
 use std::{
-    ffi::OsStr,
     fs::{create_dir, metadata, read_dir, remove_file, OpenOptions},
-    io::{Write, Error},
+    io::{Error, Write},
     path::PathBuf,
     time::Instant,
 };
 use walkdir::{DirEntry, WalkDir};
-use chrono::Local;
 
 mod config;
 mod img;
@@ -63,26 +64,27 @@ fn main() -> Result<(), Error> {
         let cimg = img::crop(fimg.path());
         let mut output_dir = cfg.output.clone();
         output_dir.push(format!("Tile{}", i));
-        output_dir.set_extension(fimg.path().extension().unwrap_or(OsStr::new("jpg")).to_ascii_lowercase());
-        if let Err(v) = cimg
-            .unwrap()
-            .save(output_dir.to_string_lossy().to_string())
-        {
+        output_dir.set_extension("jpg");
+        if let Err(v) = cimg.unwrap().save(output_dir.to_string_lossy().to_string()) {
             println!("{}", v);
         }
     }
 
     if cfg.log {
-        if let Ok(v) = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open("log.txt") {
-                let now = Local::now().format("%Y-%m-%d %H:%M:%S (%a)").to_string();
-    
-                let mut logfile = v;
-    
-                writeln!(logfile, "{}: Done sampling {} from {} found in {} ms.", now, sample.len(), flist.len(), start.elapsed().as_millis())?;
-            }
+        if let Ok(v) = OpenOptions::new().create(true).append(true).open("log.txt") {
+            let now = Local::now().format("%Y-%m-%d %H:%M:%S (%a)").to_string();
+
+            let mut logfile = v;
+
+            writeln!(
+                logfile,
+                "{}: Done sampling {} from {} found in {} ms.",
+                now,
+                sample.len(),
+                flist.len(),
+                start.elapsed().as_millis()
+            )?;
+        }
     }
 
     Ok(())

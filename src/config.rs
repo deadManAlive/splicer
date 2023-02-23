@@ -64,6 +64,10 @@ impl<P: AsRef<Path>> Config<P> {
             })
             .collect();
 
-        Ok(Config { log, locations, output })
+        Ok(Config {
+            log,
+            locations,
+            output,
+        })
     }
 }
