@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 use chrono::Local;
+use notify_rust::{Notification, Timeout};
 use std::{
     fs::{create_dir, metadata, read_dir, remove_file, OpenOptions},
     io::{Error, Write},
@@ -70,9 +71,10 @@ fn main() -> Result<(), Error> {
         }
     }
 
+    let now = Local::now().format("%Y-%m-%d %H:%M:%S (%a)").to_string();
+
     if cfg.log {
         if let Ok(v) = OpenOptions::new().create(true).append(true).open("log.txt") {
-            let now = Local::now().format("%Y-%m-%d %H:%M:%S (%a)").to_string();
 
             let mut logfile = v;
 
@@ -86,6 +88,14 @@ fn main() -> Result<(), Error> {
             )?;
         }
     }
+
+    Notification::new()
+        .summary("Plicer")
+        .body(format!("Plicer has done generating new thumbnails on {}.", now).as_str())
+        .auto_icon()
+        .timeout(Timeout::Milliseconds(5000))
+        .show()
+        .unwrap();
 
     Ok(())
 }
