@@ -1,7 +1,6 @@
 #![windows_subsystem = "windows"]
 
 use chrono::Local;
-use notify_rust::{Notification, Timeout};
 use std::{
     fs::{create_dir, metadata, read_dir, remove_file, OpenOptions},
     io::{Error, Write},
