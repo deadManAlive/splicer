@@ -8,6 +8,7 @@ use std::{
     time::Instant,
 };
 use walkdir::{DirEntry, WalkDir};
+use winrt_notification::{Duration, Sound, Toast};
 
 mod config;
 mod img;
@@ -70,10 +71,10 @@ fn main() -> Result<(), Error> {
         }
     }
 
+    let now = Local::now().format("%Y-%m-%d %H:%M:%S (%a)").to_string();
+
     if cfg.log {
         if let Ok(v) = OpenOptions::new().create(true).append(true).open("log.txt") {
-            let now = Local::now().format("%Y-%m-%d %H:%M:%S (%a)").to_string();
-
             let mut logfile = v;
 
             writeln!(
@@ -86,6 +87,14 @@ fn main() -> Result<(), Error> {
             )?;
         }
     }
+
+    Toast::new(Toast::POWERSHELL_APP_ID)
+        .title("Plicer")
+        .text1(&format!("A run was completed succesfully on {}", now))
+        .sound(Some(Sound::Default))
+        .duration(Duration::Short)
+        .show()
+        .unwrap_or(());
 
     Ok(())
 }
