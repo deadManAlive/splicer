@@ -9,6 +9,7 @@ use std::{
     time::Instant,
 };
 use walkdir::{DirEntry, WalkDir};
+use winrt_notification::{Duration, Sound, Toast};
 
 mod config;
 mod img;
@@ -75,7 +76,6 @@ fn main() -> Result<(), Error> {
 
     if cfg.log {
         if let Ok(v) = OpenOptions::new().create(true).append(true).open("log.txt") {
-
             let mut logfile = v;
 
             writeln!(
@@ -89,13 +89,13 @@ fn main() -> Result<(), Error> {
         }
     }
 
-    Notification::new()
-        .summary("Plicer")
-        .body(format!("Plicer has done generating new thumbnails on {}.", now).as_str())
-        .auto_icon()
-        .timeout(Timeout::Milliseconds(5000))
+    Toast::new(Toast::POWERSHELL_APP_ID)
+        .title("Plicer")
+        .text1(&format!("A run was completed succesfully on {}", now))
+        .sound(Some(Sound::Default))
+        .duration(Duration::Short)
         .show()
-        .unwrap();
+        .unwrap_or(());
 
     Ok(())
 }
